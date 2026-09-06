@@ -12,20 +12,16 @@ Primary feel: the active piece lives **above the grid** and slides left/right. C
 ## Teach (first 10s)
 
 1. Nigiri is already in the teach column. Held piece above the grid is also Nigiri.
-2. One-liner (until first merge, then hide): `← → move · ↓ drop. Match to merge.`
-3. L/R is free. Dropping in the wrong column **soft-bounces** back to the teach column (aim is not hard-locked).
+2. Teach column has an explicit pulsing **Drop here** cue. No silent bounce. No drop block.
+3. L/R is free. Drop anywhere is allowed on the first drop (and after).
 4. Drop on the teach column: piece **falls** from the rail onto the cell stacked on that Nigiri, then merges → Maki.
+5. One-liner (until first merge, then hide): `← → move · ↓ drop. Match to merge.`
+6. Short tier names (Nigiri, Maki, …) show on tiles. DANGER is hidden.
 
-Pass: a stranger slides L/R, drops once on the teach column, and merges without asking.
+Pass: a stranger can slide L/R, drop anywhere, see **Drop here** on the teach column, and get an easy first merge without being bounced.
 
 ## Landing check (blocking)
 
 A drop must visibly tween from the active piece **above the grid** down to the **lowest empty cell** in that column (stack on existing tiles; empty column = bottom row). Then merge if same tier.
 
-Must not: stick mid-column, teleport, stay at the top, or end the tween above the real landing cell.
-
-Verified locally (headless Chrome, sampled `.fall-tile` every 32ms):
-
-- Teach column (seeded Nigiri on row 7): tween starts on the rail (`top ≈ 172`) and finishes on the stack cell (`top ≈ 649` vs cell `646`). Landing row **6**, then merge → Maki on row 7 (score 10). One-liner hides.
-- Empty column after teach: tween starts on the rail (`top ≈ 203`) and finishes on the **bottom** cell (`top ≈ 737` vs cell `734`). Landing row **7**. No mid-column leftover.
-- Wrong first drop: L/R away, Drop, piece soft-bounces back to the teach column; nothing is placed.
+Must not: stick mid-column, teleport, stay at the top, end the tween above the real landing cell, or bounce/block a first drop.
