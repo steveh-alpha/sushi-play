@@ -1,5 +1,5 @@
 /**
- * Sushi Stack 2048 — GRO-9 graybox rules.
+ * Sushi Stack 2048 — GRO-15 art demo (7 canon tiers).
  * Vertical same-tier merge only. No horizontal merge. No game-over.
  */
 (function (root, factory) {
@@ -13,22 +13,20 @@
 
   const COLS = 6;
   const ROWS = 8;
-  const MAX_TIER = 5;
+  const MAX_TIER = 6;
 
   const TIERS = [
     { id: 0, name: "Nigiri", glyph: "N" },
-    { id: 1, name: "Roll", glyph: "R" },
-    { id: 2, name: "Plate", glyph: "P" },
-    { id: 3, name: "Boat", glyph: "B" },
-    { id: 4, name: "Tower", glyph: "T" },
-    { id: 5, name: "Feast", glyph: "F" },
+    { id: 1, name: "Maki", glyph: "M" },
+    { id: 2, name: "Gunkan", glyph: "G" },
+    { id: 3, name: "Temaki", glyph: "T" },
+    { id: 4, name: "Chirashi", glyph: "C" },
+    { id: 5, name: "Platter", glyph: "P" },
+    { id: 6, name: "Feast", glyph: "F" },
   ];
 
-  /** Points awarded for the *resulting* tier of a merge. */
-  const MERGE_POINTS = [0, 10, 30, 80, 200, 500];
-
-  /** Mostly low; rare mid; almost never top. */
-  const SPAWN_WEIGHTS = [55, 28, 12, 4, 0.9, 0.1];
+  const MERGE_POINTS = [0, 10, 30, 80, 200, 500, 1200];
+  const SPAWN_WEIGHTS = [50, 26, 12, 7, 3.5, 1.2, 0.3];
 
   function mulberry32(seed) {
     let a = seed >>> 0;
@@ -77,11 +75,6 @@
     }
   }
 
-  /**
-   * Resolve vertical same-tier pairs in one column, including chains.
-   * Scans bottom-up; each merge upgrades the lower cell and clears the upper.
-   * Two Feasts do not merge.
-   */
   function resolveVerticalMerges(grid, col) {
     let chain = 0;
     let score = 0;
@@ -100,14 +93,7 @@
           chain += 1;
           const gained = MERGE_POINTS[result] * chain;
           score += gained;
-          merges.push({
-            row: r,
-            col,
-            from: lower,
-            to: result,
-            chain,
-            gained,
-          });
+          merges.push({ row: r, col, from: lower, to: result, chain, gained });
           found = true;
           break;
         }
@@ -136,14 +122,9 @@
   }
 
   function drop(state, col) {
-    if (col < 0 || col >= COLS) {
-      return { ok: false, reason: "bad-col" };
-    }
+    if (col < 0 || col >= COLS) return { ok: false, reason: "bad-col" };
     const row = lowestEmptyRow(state.grid, col);
-    if (row < 0) {
-      return { ok: false, reason: "full" };
-    }
-
+    if (row < 0) return { ok: false, reason: "full" };
     state.grid[row][col] = state.current;
     const merge = resolveVerticalMerges(state.grid, col);
     state.score += merge.score;
@@ -155,28 +136,13 @@
 
   function columnHeight(grid, col) {
     let n = 0;
-    for (let r = 0; r < ROWS; r++) {
-      if (grid[r][col] !== null) n++;
-    }
+    for (let r = 0; r < ROWS; r++) if (grid[r][col] !== null) n++;
     return n;
   }
 
   return {
-    COLS,
-    ROWS,
-    MAX_TIER,
-    TIERS,
-    MERGE_POINTS,
-    SPAWN_WEIGHTS,
-    mulberry32,
-    emptyGrid,
-    cloneGrid,
-    spawnTier,
-    lowestEmptyRow,
-    applyGravity,
-    resolveVerticalMerges,
-    createGame,
-    drop,
-    columnHeight,
+    COLS, ROWS, MAX_TIER, TIERS, MERGE_POINTS, SPAWN_WEIGHTS,
+    mulberry32, emptyGrid, cloneGrid, spawnTier, lowestEmptyRow,
+    applyGravity, resolveVerticalMerges, createGame, drop, columnHeight,
   };
 });
