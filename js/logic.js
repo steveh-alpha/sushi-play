@@ -1,7 +1,8 @@
 /**
- * Sushi Stack 2048 — GRO-16 teach + targeting.
+ * Sushi Stack 2048 — GRO-16 amend (L/R aim + confirm drop).
  * Vertical same-tier merge only. No horizontal merge. No game-over.
  * Opening: Nigiri seeded in teach column; first held piece is Nigiri.
+ * First drop must land in the teach column (caller soft-bounces others).
  */
 (function (root, factory) {
   const api = factory();
@@ -134,11 +135,20 @@
     return state;
   }
 
-  function drop(state, col) {
-    if (state.teach) col = state.teachCol;
-    if (col < 0 || col >= COLS) return { ok: false, reason: "bad-col" };
+  function previewDrop(state, col) {
+    if (col < 0 || col >= COLS) return { ok: false, reason: "bad-col", row: -1, col: col };
+    if (state.teach && col !== state.teachCol) {
+      return { ok: false, reason: "teach", row: -1, col: col };
+    }
     const row = lowestEmptyRow(state.grid, col);
-    if (row < 0) return { ok: false, reason: "full" };
+    if (row < 0) return { ok: false, reason: "full", row: -1, col: col };
+    return { ok: true, row: row, col: col };
+  }
+
+  function drop(state, col) {
+    const preview = previewDrop(state, col);
+    if (!preview.ok) return preview;
+    const row = preview.row;
     state.grid[row][col] = state.current;
     const merge = resolveVerticalMerges(state.grid, col);
     state.score += merge.score;
@@ -146,7 +156,7 @@
     state.current = state.next;
     state.next = spawnTier(state.rng);
     if (state.teach) state.teach = false;
-    return { ok: true, row, col, merge };
+    return { ok: true, row: row, col: col, merge: merge };
   }
 
   function columnHeight(grid, col) {
@@ -158,6 +168,6 @@
   return {
     COLS, ROWS, MAX_TIER, TEACH_COL, TIERS, MERGE_POINTS, SPAWN_WEIGHTS,
     mulberry32, emptyGrid, cloneGrid, spawnTier, lowestEmptyRow,
-    applyGravity, resolveVerticalMerges, createGame, drop, columnHeight,
+    applyGravity, resolveVerticalMerges, createGame, previewDrop, drop, columnHeight,
   };
 });
