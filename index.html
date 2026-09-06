@@ -12,48 +12,39 @@
     <link rel="stylesheet" href="css/tier-4.css" />
     <link rel="stylesheet" href="css/tier-5.css" />
     <link rel="stylesheet" href="css/tier-6.css" />
-    <link rel="stylesheet" href="css/ux.css" />
   </head>
   <body>
     <main class="shell">
       <header class="mast">
         <div>
           <h1>Sushi Stack</h1>
-          <p class="tag">Mike art · vertical merge</p>
+          <p class="tag">2048 with sushi</p>
         </div>
-        <div class="scorebox">
-          <span class="label">Score</span>
-          <span id="score">0</span>
-          <span id="score-flash"></span>
+        <div class="scores">
+          <div class="scorebox">
+            <span class="label">Score</span>
+            <span id="score">0</span>
+            <span id="score-flash"></span>
+          </div>
+          <div class="scorebox">
+            <span class="label">Best</span>
+            <span id="best">0</span>
+          </div>
         </div>
       </header>
 
-      <section class="rack" aria-label="Next piece">
-        <div class="preview">
-          <span class="label">Next</span>
-          <div id="next-tile" class="tile"></div>
-        </div>
-      </section>
-
       <div class="well">
-        <div class="play-stage">
-          <div class="aim-rail" id="aim-rail" aria-label="Active piece">
-            <div id="current-tile" class="tile active-piece" role="button" tabindex="0" aria-label="Active piece, tap to drop"></div>
+        <div class="board-wrap">
+          <div id="board" role="grid" aria-label="Sushi 2048 board"></div>
+          <div id="overlay" hidden>
+            <p>No more moves</p>
+            <button type="button" id="overlay-new">New game</button>
           </div>
-          <div class="board-wrap">
-            <div id="board" role="grid" aria-label="Sushi board"></div>
-          </div>
-          <div id="fx" aria-hidden="true"></div>
-        </div>
-        <div class="pad" role="group" aria-label="Move and drop">
-          <button type="button" id="btn-left" aria-label="Move left">←</button>
-          <button type="button" id="btn-drop" aria-label="Drop">↓ Drop</button>
-          <button type="button" id="btn-right" aria-label="Move right">→</button>
         </div>
       </div>
 
       <footer class="footer">
-        <p id="hint">← → move · ↓ drop. Match to merge.</p>
+        <p id="hint">Swipe or arrows to merge sushi.</p>
         <button type="button" id="new-game">New game</button>
       </footer>
     </main>

@@ -1,27 +1,18 @@
 # PLAYTEST
 
-Primary feel: the active piece lives **above the grid** and slides left/right. Column-tap is only aim (or drop once that column is already aimed). Not the old tap-any-column-to-drop.
+Primary feel: **classic 2048 with sushi.** The whole 4×4 board slides on swipe / arrows. Not a column dropper.
 
 ## Controls
 
-- **← →** keyboard, on-screen arrows, or horizontal swipe: slide the piece across columns immediately.
-- **Click a column:** aim there (piece, ghost, and column wash follow).
-- **Drop:** ↓ / Space / **↓ Drop** / tap the active piece / click the column that is already aimed.
-- Ghost sits on the **lowest empty cell** of the aimed column.
+- **Arrow keys** and **swipe** L / R / U / D move every tile that direction.
+- Same-tier tiles merge once per move: Nigiri → Maki → Gunkan → Temaki → Chirashi → Platter → Feast.
+- After a successful move, one new low-tier tile appears in a random empty cell (mostly Nigiri, rare Maki).
+- Score + best (best is local). New game resets the board.
 
 ## Teach (first 10s)
 
-1. Nigiri is already in the teach column. Held piece above the grid is also Nigiri.
-2. Teach column has an explicit pulsing **Drop here** cue. No silent bounce. No drop block.
-3. L/R is free. Drop anywhere is allowed on the first drop (and after).
-4. Drop on the teach column: piece **falls** from the rail onto the cell stacked on that Nigiri, then merges → Maki.
-5. One-liner (until first merge, then hide): `← → move · ↓ drop. Match to merge.`
-6. Short tier names (Nigiri, Maki, …) show on tiles. DANGER is hidden.
+1. Two Nigiri start on the same row so one left or right swipe merges them.
+2. One-liner until the first merge, then hide: `Swipe or arrows to merge sushi.`
+3. No Drop button, no falling piece, no “Drop here”, no column aim chrome.
 
-Pass: a stranger can slide L/R, drop anywhere, see **Drop here** on the teach column, and get an easy first merge without being bounced.
-
-## Landing check (blocking)
-
-A drop must visibly tween from the active piece **above the grid** down to the **lowest empty cell** in that column (stack on existing tiles; empty column = bottom row). Then merge if same tier.
-
-Must not: stick mid-column, teleport, stay at the top, end the tween above the real landing cell, or bounce/block a first drop.
+Pass: a stranger swipes or hits an arrow, merges Nigiri → Maki in about 10 seconds, and says “it’s 2048 with sushi.”
