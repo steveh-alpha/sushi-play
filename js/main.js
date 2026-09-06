@@ -2,7 +2,10 @@
   "use strict";
 
   const S = window.SushiStack;
+  const TEACH_COPY = "Tap a column to drop. Match stack to merge.";
+
   const boardEl = document.getElementById("board");
+  const fxEl = document.getElementById("fx");
   const scoreEl = document.getElementById("score");
   const scoreFlashEl = document.getElementById("score-flash");
   const currentTileEl = document.getElementById("current-tile");
@@ -14,6 +17,8 @@
   let hoverCol = null;
   let pointerDown = false;
   let ignoreClick = false;
+  let dropping = false;
+  let teachCopyOn = true;
 
   function tileClass(tier) {
     return "tile tier-" + tier;
@@ -32,17 +37,91 @@
   }
 
   function setHint(text) {
+    hintEl.hidden = false;
     hintEl.textContent = text;
   }
 
+  function hideTeachCopy() {
+    teachCopyOn = false;
+    hintEl.textContent = "";
+    hintEl.hidden = true;
+  }
+
+  function cellEl(row, col) {
+    return boardEl.querySelector('.cell[data-row="' + row + '"][data-col="' + col + '"]');
+  }
+
+  function targetCol() {
+    if (state.teach) return state.teachCol;
+    return hoverCol;
+  }
+
+  function clearGhost() {
+    const ghosts = boardEl.querySelectorAll(".tile.ghost");
+    for (let i = 0; i < ghosts.length; i++) ghosts[i].remove();
+  }
+
+  function paintGhost(col) {
+    clearGhost();
+    if (col === null || dropping) return;
+    const row = S.lowestEmptyRow(state.grid, col);
+    if (row < 0) return;
+    const cell = cellEl(row, col);
+    if (!cell) return;
+    const ghost = document.createElement("div");
+    renderTile(ghost, state.current);
+    ghost.classList.add("ghost");
+    ghost.setAttribute("aria-hidden", "true");
+    cell.appendChild(ghost);
+  }
+
+  function paintWash(col) {
+    let wash = fxEl.querySelector(".col-wash");
+    if (!wash) {
+      wash = document.createElement("div");
+      wash.className = "col-wash";
+      fxEl.appendChild(wash);
+    }
+    if (col === null || dropping) {
+      wash.hidden = true;
+      return;
+    }
+    const top = cellEl(0, col);
+    if (!top) {
+      wash.hidden = true;
+      return;
+    }
+    const wrapRect = fxEl.getBoundingClientRect();
+    const cellRect = top.getBoundingClientRect();
+    const boardRect = boardEl.getBoundingClientRect();
+    wash.hidden = false;
+    wash.style.left = cellRect.left - wrapRect.left + "px";
+    wash.style.width = cellRect.width + "px";
+    wash.style.top = boardRect.top - wrapRect.top + "px";
+    wash.style.height = boardRect.height + "px";
+  }
+
   function paintHover() {
+    const col = targetCol();
     const cells = boardEl.querySelectorAll(".cell");
     for (let i = 0; i < cells.length; i++) {
       const cell = cells[i];
-      cell.classList.toggle("col-hover", hoverCol !== null && cell.dataset.col === String(hoverCol));
+      const isTarget = col !== null && cell.dataset.col === String(col);
+      cell.classList.toggle("col-hover", isTarget);
+      cell.classList.toggle("col-blocked", !!(state.teach && !isTarget));
+    }
+    boardEl.classList.toggle("teach-lock", !!state.teach);
+    paintGhost(col);
+    paintWash(col);
+    if (teachCopyOn) {
+      setHint(TEACH_COPY);
+      return;
     }
     if (hoverCol !== null) setHint("Drop in column " + (hoverCol + 1));
-    else setHint("Tap or drag a column to drop");
+    else {
+      hintEl.textContent = "";
+      hintEl.hidden = true;
+    }
   }
 
   function render() {
@@ -83,25 +162,80 @@
     scoreFlashEl.classList.add("pop");
   }
 
+  function playDropTween(col, row, tier, done) {
+    const startCell = cellEl(0, col);
+    const endCell = cellEl(row, col);
+    if (!startCell || !endCell) {
+      done();
+      return;
+    }
+
+    const wrapRect = fxEl.getBoundingClientRect();
+    const startRect = startCell.getBoundingClientRect();
+    const endRect = endCell.getBoundingClientRect();
+    const dy = endRect.top - startRect.top;
+    const duration = Math.min(420, Math.max(240, Math.abs(dy) * 1.15));
+
+    const fall = document.createElement("div");
+    renderTile(fall, tier);
+    fall.classList.add("fall-tile");
+    fall.style.left = startRect.left - wrapRect.left + "px";
+    fall.style.top = startRect.top - wrapRect.top + "px";
+    fall.style.width = startRect.width + "px";
+    fall.style.height = startRect.height + "px";
+    fxEl.appendChild(fall);
+
+    let finished = false;
+    function finish() {
+      if (finished) return;
+      finished = true;
+      if (fall.parentNode) fall.parentNode.removeChild(fall);
+      done();
+    }
+
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () {
+        fall.style.transition = "transform " + duration + "ms cubic-bezier(0.32, 0.08, 0.28, 1)";
+        fall.style.transform = "translateY(" + dy + "px)";
+      });
+    });
+
+    fall.addEventListener("transitionend", finish);
+    setTimeout(finish, duration + 80);
+  }
+
   function tryDrop(col) {
-    const before = state.score;
-    const held = state.current;
-    const result = S.drop(state, col);
-    if (!result.ok) {
-      if (result.reason === "full") {
-        setHint("Column full — try another");
-        boardEl.classList.add("shake");
-        setTimeout(function () {
-          boardEl.classList.remove("shake");
-        }, 240);
-      }
+    if (dropping) return false;
+    if (state.teach) col = state.teachCol;
+    const row = S.lowestEmptyRow(state.grid, col);
+    if (row < 0) {
+      if (!teachCopyOn) setHint("Column full — try another");
+      boardEl.classList.add("shake");
+      setTimeout(function () {
+        boardEl.classList.remove("shake");
+      }, 240);
       render();
       return false;
     }
-    const gained = state.score - before;
-    render();
-    flashScore(gained, result.merge.chain);
-    return { held: held, gained: gained, chain: result.merge.chain };
+
+    const before = state.score;
+    const held = state.current;
+    dropping = true;
+    paintHover();
+
+    playDropTween(col, row, held, function () {
+      const result = S.drop(state, col);
+      dropping = false;
+      if (!result.ok) {
+        render();
+        return;
+      }
+      if (teachCopyOn) hideTeachCopy();
+      const gained = state.score - before;
+      render();
+      flashScore(gained, result.merge.chain);
+    });
+    return true;
   }
 
   function colFromEvent(event) {
@@ -168,13 +302,22 @@
     tryDrop(col);
   });
 
-  newGameBtn.addEventListener("click", function () {
-    state = S.createGame();
+  function resetPlay(seed) {
+    state = S.createGame(seed != null ? { seed: seed } : {});
     hoverCol = null;
     pointerDown = false;
     ignoreClick = false;
+    dropping = false;
+    teachCopyOn = true;
     scoreFlashEl.textContent = "";
+    fxEl.innerHTML = "";
+    hintEl.hidden = false;
     render();
+    return state;
+  }
+
+  newGameBtn.addEventListener("click", function () {
+    resetPlay();
   });
 
   window.SushiStackPlay = {
@@ -183,12 +326,7 @@
     },
     drop: tryDrop,
     render: render,
-    newGame: function (seed) {
-      state = S.createGame(seed != null ? { seed: seed } : {});
-      hoverCol = null;
-      render();
-      return state;
-    },
+    newGame: resetPlay,
   };
 
   render();

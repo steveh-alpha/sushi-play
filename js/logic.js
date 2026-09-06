@@ -1,6 +1,7 @@
 /**
- * Sushi Stack 2048 — GRO-15 art demo (7 canon tiers).
+ * Sushi Stack 2048 — GRO-16 teach + targeting.
  * Vertical same-tier merge only. No horizontal merge. No game-over.
+ * Opening: Nigiri seeded in teach column; first held piece is Nigiri.
  */
 (function (root, factory) {
   const api = factory();
@@ -14,6 +15,7 @@
   const COLS = 6;
   const ROWS = 8;
   const MAX_TIER = 6;
+  const TEACH_COL = 2;
 
   const TIERS = [
     { id: 0, name: "Nigiri", glyph: "N" },
@@ -104,11 +106,18 @@
     return { chain, score, merges };
   }
 
+  function seedTeach(state) {
+    state.grid[ROWS - 1][TEACH_COL] = 0;
+    state.current = 0;
+    state.teachCol = TEACH_COL;
+    state.teach = true;
+  }
+
   function createGame(options) {
     const opts = options || {};
     const seed = opts.seed != null ? opts.seed : (Date.now() ^ (Math.random() * 0x100000000));
     const rng = mulberry32(seed >>> 0);
-    return {
+    const state = {
       cols: COLS,
       rows: ROWS,
       seed: seed >>> 0,
@@ -117,11 +126,16 @@
       current: spawnTier(rng),
       next: spawnTier(rng),
       lastMerge: null,
+      teach: false,
+      teachCol: TEACH_COL,
       rng,
     };
+    if (opts.teach !== false) seedTeach(state);
+    return state;
   }
 
   function drop(state, col) {
+    if (state.teach) col = state.teachCol;
     if (col < 0 || col >= COLS) return { ok: false, reason: "bad-col" };
     const row = lowestEmptyRow(state.grid, col);
     if (row < 0) return { ok: false, reason: "full" };
@@ -131,7 +145,8 @@
     state.lastMerge = merge.merges.length ? merge : null;
     state.current = state.next;
     state.next = spawnTier(state.rng);
-    return { ok: true, row, merge };
+    if (state.teach) state.teach = false;
+    return { ok: true, row, col, merge };
   }
 
   function columnHeight(grid, col) {
@@ -141,7 +156,7 @@
   }
 
   return {
-    COLS, ROWS, MAX_TIER, TIERS, MERGE_POINTS, SPAWN_WEIGHTS,
+    COLS, ROWS, MAX_TIER, TEACH_COL, TIERS, MERGE_POINTS, SPAWN_WEIGHTS,
     mulberry32, emptyGrid, cloneGrid, spawnTier, lowestEmptyRow,
     applyGravity, resolveVerticalMerges, createGame, drop, columnHeight,
   };
