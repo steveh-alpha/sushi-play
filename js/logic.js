@@ -2,7 +2,7 @@
  * Sushi Stack 2048 — GRO-16 amend (L/R aim + confirm drop).
  * Vertical same-tier merge only. No horizontal merge. No game-over.
  * Opening: Nigiri seeded in teach column; first held piece is Nigiri.
- * First drop must land in the teach column (caller soft-bounces others).
+ * L/R and first drop are free — no bounce, no teach-column lock.
  */
 (function (root, factory) {
   const api = factory();
@@ -137,9 +137,6 @@
 
   function previewDrop(state, col) {
     if (col < 0 || col >= COLS) return { ok: false, reason: "bad-col", row: -1, col: col };
-    if (state.teach && col !== state.teachCol) {
-      return { ok: false, reason: "teach", row: -1, col: col };
-    }
     const row = lowestEmptyRow(state.grid, col);
     if (row < 0) return { ok: false, reason: "full", row: -1, col: col };
     return { ok: true, row: row, col: col };

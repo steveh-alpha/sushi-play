@@ -33,6 +33,7 @@
   function renderTile(el, tier, label) {
     el.className = tileClass(tier);
     const meta = S.TIERS[tier];
+    el.setAttribute("data-name", meta.name);
     el.innerHTML =
       '<span class="glyph">' +
       meta.glyph +
@@ -123,6 +124,35 @@
     wash.style.height = boardRect.bottom - layerRect.top + "px";
   }
 
+  function paintDropHere() {
+    let cue = fxEl.querySelector(".drop-here");
+    if (!cue) {
+      cue = document.createElement("div");
+      cue.className = "drop-here";
+      cue.innerHTML = '<div class="drop-here-wash"></div><span class="drop-here-label">Drop here</span>';
+      fxEl.appendChild(cue);
+    }
+    const show = !!(state.teach && !dropping);
+    boardEl.classList.toggle("teach-on", show);
+    if (!show) {
+      cue.hidden = true;
+      return;
+    }
+    const top = cellEl(0, state.teachCol);
+    if (!top) {
+      cue.hidden = true;
+      return;
+    }
+    const layerRect = fxEl.getBoundingClientRect();
+    const cellRect = top.getBoundingClientRect();
+    const boardRect = boardEl.getBoundingClientRect();
+    cue.hidden = false;
+    cue.style.left = cellRect.left - layerRect.left + "px";
+    cue.style.width = cellRect.width + "px";
+    cue.style.top = boardRect.top - layerRect.top + "px";
+    cue.style.height = boardRect.height + "px";
+  }
+
   function positionActivePiece(snap) {
     const top = cellEl(0, aimCol);
     if (!top || !aimRailEl) return;
@@ -147,6 +177,7 @@
     positionActivePiece();
     paintGhost(aimCol);
     paintWash(aimCol);
+    paintDropHere();
     if (teachCopyOn) setHint(TEACH_COPY);
     else {
       hintEl.textContent = "";
@@ -177,6 +208,7 @@
         cell.dataset.col = String(c);
         cell.dataset.row = String(r);
         const tier = state.grid[r][c];
+        if (state.teach && c === state.teachCol) cell.classList.add("teach-col");
         if (tier !== null) {
           const tile = document.createElement("div");
           renderTile(tile, tier);
@@ -204,23 +236,6 @@
     scoreFlashEl.classList.remove("pop");
     void scoreFlashEl.offsetWidth;
     scoreFlashEl.classList.add("pop");
-  }
-
-  function softBounceToTeach() {
-    const from = aimCol;
-    const dir = from < state.teachCol ? -1 : 1;
-    currentTileEl.classList.remove("soft-bounce");
-    currentTileEl.style.setProperty("--bounce-dir", String(dir));
-    setAim(state.teachCol);
-    void currentTileEl.offsetWidth;
-    currentTileEl.classList.add("soft-bounce");
-    currentTileEl.addEventListener(
-      "animationend",
-      function () {
-        currentTileEl.classList.remove("soft-bounce");
-      },
-      { once: true }
-    );
   }
 
   function playDropTween(col, row, tier, done) {
@@ -304,10 +319,6 @@
 
     const preview = S.previewDrop(state, col);
     if (!preview.ok) {
-      if (preview.reason === "teach") {
-        softBounceToTeach();
-        return false;
-      }
       if (preview.reason === "full") {
         if (!teachCopyOn) setHint("Column full — try another");
         boardEl.classList.add("shake");
@@ -335,7 +346,7 @@
       lastFall = lastFall
         ? Object.assign({}, lastFall, { placedRow: result.row, merged: !!(result.merge && result.merge.chain) })
         : lastFall;
-      if (teachCopyOn) hideTeachCopy();
+      if (teachCopyOn && result.merge && result.merge.chain) hideTeachCopy();
       const gained = state.score - before;
       render();
       flashScore(gained, result.merge.chain);
@@ -446,6 +457,7 @@
   window.addEventListener("resize", function () {
     positionActivePiece();
     paintWash(aimCol);
+    paintDropHere();
   });
 
   function resetPlay(seed) {
@@ -485,6 +497,9 @@
     newGame: resetPlay,
     lastFall: function () {
       return lastFall;
+    },
+    teachOn: function () {
+      return !!state.teach;
     },
   };
 
