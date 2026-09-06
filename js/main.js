@@ -3,10 +3,12 @@
 
   const S = window.SushiStack;
   const TEACH_COPY = "← → move · ↓ drop. Match to merge.";
+  const TEACH_LOCK_COPY = "Drop here first";
   const SWIPE_PX = 24;
 
   const boardEl = document.getElementById("board");
   const fxEl = document.getElementById("fx");
+  const teachCueEl = document.getElementById("teach-cue");
   const aimRailEl = document.getElementById("aim-rail");
   const playStageEl = document.querySelector(".play-stage");
   const scoreEl = document.getElementById("score");
@@ -23,6 +25,7 @@
   let aimCol = S.TEACH_COL;
   let dropping = false;
   let teachCopyOn = true;
+  let bounceHintOn = false;
   let lastFall = null;
   let ptr = null;
 
@@ -86,6 +89,7 @@
   function paintGhost(col) {
     clearGhost();
     if (col === null || dropping) return;
+    if (state.teach && col !== state.teachCol) return;
     const row = S.lowestEmptyRow(state.grid, col);
     if (row < 0) return;
     const cell = cellEl(row, col);
@@ -95,6 +99,44 @@
     ghost.classList.add("ghost");
     ghost.setAttribute("aria-hidden", "true");
     cell.appendChild(ghost);
+  }
+
+  function paintTeachCue(flash) {
+    const cells = boardEl.querySelectorAll(".cell");
+    for (let i = 0; i < cells.length; i++) {
+      const cell = cells[i];
+      cell.classList.toggle("teach-col", !!(state.teach && cell.dataset.col === String(state.teachCol)));
+    }
+    if (!teachCueEl) return;
+    if (!state.teach || dropping) {
+      teachCueEl.hidden = true;
+      teachCueEl.classList.remove("is-flash");
+      return;
+    }
+    const top = cellEl(0, state.teachCol);
+    if (!top) {
+      teachCueEl.hidden = true;
+      return;
+    }
+    const layerRect = fxEl.getBoundingClientRect();
+    const cellRect = top.getBoundingClientRect();
+    teachCueEl.hidden = false;
+    teachCueEl.textContent = TEACH_LOCK_COPY;
+    teachCueEl.style.left = cellRect.left - layerRect.left + "px";
+    teachCueEl.style.width = cellRect.width + "px";
+    teachCueEl.style.top = cellRect.top - layerRect.top + 4 + "px";
+    if (flash) {
+      teachCueEl.classList.remove("is-flash");
+      void teachCueEl.offsetWidth;
+      teachCueEl.classList.add("is-flash");
+      teachCueEl.addEventListener(
+        "animationend",
+        function () {
+          teachCueEl.classList.remove("is-flash");
+        },
+        { once: true }
+      );
+    }
   }
 
   function paintWash(col) {
@@ -147,7 +189,9 @@
     positionActivePiece();
     paintGhost(aimCol);
     paintWash(aimCol);
-    if (teachCopyOn) setHint(TEACH_COPY);
+    paintTeachCue();
+    if (bounceHintOn) setHint(TEACH_LOCK_COPY);
+    else if (teachCopyOn) setHint(TEACH_COPY);
     else {
       hintEl.textContent = "";
       hintEl.hidden = true;
@@ -211,13 +255,17 @@
     const dir = from < state.teachCol ? -1 : 1;
     currentTileEl.classList.remove("soft-bounce");
     currentTileEl.style.setProperty("--bounce-dir", String(dir));
+    bounceHintOn = true;
     setAim(state.teachCol);
+    paintTeachCue(true);
     void currentTileEl.offsetWidth;
     currentTileEl.classList.add("soft-bounce");
     currentTileEl.addEventListener(
       "animationend",
       function () {
         currentTileEl.classList.remove("soft-bounce");
+        bounceHintOn = false;
+        if (teachCopyOn && state.teach) setHint(TEACH_COPY);
       },
       { once: true }
     );
@@ -446,6 +494,7 @@
   window.addEventListener("resize", function () {
     positionActivePiece();
     paintWash(aimCol);
+    paintTeachCue();
   });
 
   function resetPlay(seed) {
@@ -454,6 +503,7 @@
     ptr = null;
     dropping = false;
     teachCopyOn = true;
+    bounceHintOn = false;
     lastFall = null;
     scoreFlashEl.textContent = "";
     fxEl.innerHTML = "";
@@ -485,6 +535,9 @@
     newGame: resetPlay,
     lastFall: function () {
       return lastFall;
+    },
+    teachCue: function () {
+      return teachCueEl;
     },
   };
 

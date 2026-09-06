@@ -42,9 +42,11 @@
           </div>
           <div class="board-wrap">
             <div id="board" role="grid" aria-label="Sushi board"></div>
-            <div class="danger" aria-hidden="true"><span>DANGER</span></div>
+            <div class="danger" hidden aria-hidden="true"><span>DANGER</span></div>
           </div>
-          <div id="fx" aria-hidden="true"></div>
+          <div id="fx" aria-hidden="true">
+            <div id="teach-cue" class="teach-cue" hidden>Drop here first</div>
+          </div>
         </div>
         <div class="pad" role="group" aria-label="Move and drop">
           <button type="button" id="btn-left" aria-label="Move left">←</button>
@@ -57,7 +59,6 @@
         <p id="hint">← → move · ↓ drop. Match to merge.</p>
         <button type="button" id="new-game">New game</button>
       </footer>
-      <p class="note">GRO-16: ← → move · ↓ drop · no rising rows · vertical merge only.</p>
     </main>
     <script src="js/logic.js"></script>
     <script src="js/main.js"></script>

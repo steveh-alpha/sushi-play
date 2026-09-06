@@ -102,3 +102,70 @@
   outline: 2px dashed rgba(244, 230, 208, 0.55);
   outline-offset: -2px;
 }
+
+/* Rising rows are not in this demo — hide the unused DANGER rail. */
+.danger {
+  display: none !important;
+}
+
+/* Override Mike art hide so match identity stays readable. */
+.tile {
+  position: relative;
+}
+
+.tile .name {
+  display: block !important;
+  position: absolute;
+  left: 3px;
+  right: 3px;
+  bottom: 2px;
+  z-index: 1;
+  color: #f4e6d0 !important;
+  background: rgba(20, 14, 12, 0.86);
+  border-radius: 4px;
+  font-size: 0.5rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  line-height: 1.15;
+  text-align: center;
+  text-transform: none;
+  white-space: nowrap;
+  padding: 1px 2px;
+}
+
+#board .cell.teach-col {
+  background: rgba(232, 154, 58, 0.18);
+  box-shadow: inset 0 0 0 2px rgba(232, 154, 58, 0.55);
+}
+
+#fx .teach-cue {
+  position: absolute;
+  z-index: 6;
+  pointer-events: none;
+  box-sizing: border-box;
+  padding: 4px 3px;
+  border-radius: 7px;
+  background: var(--lantern);
+  color: #1a100c;
+  font-size: 0.58rem;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  line-height: 1.15;
+  text-align: center;
+  text-transform: uppercase;
+  box-shadow: 0 2px 0 #1b100b;
+}
+
+#fx .teach-cue.is-flash {
+  animation: teach-flash 420ms ease-out;
+}
+
+@keyframes teach-flash {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  35% {
+    transform: scale(1.1);
+  }
+}
