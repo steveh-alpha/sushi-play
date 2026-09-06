@@ -260,6 +260,6 @@ button:active {
 }
 
 /* GRO-15 Mike art (data-uri tiles) */
-.tile { background-color: transparent !important; background-size: contain; background-repeat: no-repeat; background-position: center; box-shadow: none; color: transparent; }
-.tile .glyph, .tile .name, .tile .slot { display: none; }
+.tile { background-color: transparent !important; background-size: contain; background-repeat: no-repeat; background-position: center; box-shadow: none; }
+.tile .glyph, .tile .name, .tile .slot { color: #fff; }
 .cell .tile { background-color: rgba(255,255,255,0.06); border-radius: 8px; }
