@@ -28,10 +28,7 @@
         </div>
       </header>
 
-      <section class="rack" aria-label="Current and next pieces">
-        <div class="preview">
-          <div id="current-tile" class="tile"></div>
-        </div>
+      <section class="rack" aria-label="Next piece">
         <div class="preview">
           <span class="label">Next</span>
           <div id="next-tile" class="tile"></div>
@@ -39,18 +36,28 @@
       </section>
 
       <div class="well">
-        <div class="board-wrap">
-          <div id="board" role="grid" aria-label="Sushi board"></div>
+        <div class="play-stage">
+          <div class="aim-rail" id="aim-rail" aria-label="Active piece">
+            <div id="current-tile" class="tile active-piece" role="button" tabindex="0" aria-label="Active piece, tap to drop"></div>
+          </div>
+          <div class="board-wrap">
+            <div id="board" role="grid" aria-label="Sushi board"></div>
+            <div class="danger" aria-hidden="true"><span>DANGER</span></div>
+          </div>
           <div id="fx" aria-hidden="true"></div>
-          <div class="danger" aria-hidden="true"><span>DANGER</span></div>
+        </div>
+        <div class="pad" role="group" aria-label="Move and drop">
+          <button type="button" id="btn-left" aria-label="Move left">←</button>
+          <button type="button" id="btn-drop" aria-label="Drop">↓ Drop</button>
+          <button type="button" id="btn-right" aria-label="Move right">→</button>
         </div>
       </div>
 
       <footer class="footer">
-        <p id="hint">Tap a column to drop. Match stack to merge.</p>
+        <p id="hint">← → move · ↓ drop. Match to merge.</p>
         <button type="button" id="new-game">New game</button>
       </footer>
-      <p class="note">GRO-16: teach + targeting · no rising rows · no game over · vertical merge only.</p>
+      <p class="note">GRO-16: ← → move · ↓ drop · no rising rows · vertical merge only.</p>
     </main>
     <script src="js/logic.js"></script>
     <script src="js/main.js"></script>

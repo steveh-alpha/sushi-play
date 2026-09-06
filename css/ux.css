@@ -1,20 +1,86 @@
-/* GRO-16 teach + targeting. Mike art sheets stay untouched. */
+/* GRO-16 amend: L/R aim + confirm drop. Mike art sheets stay untouched. */
+
+.rack {
+  justify-content: flex-end;
+}
+
+.play-stage {
+  position: relative;
+  touch-action: none;
+}
+
+.aim-rail {
+  position: relative;
+  z-index: 4;
+  height: 56px;
+  margin-bottom: 8px;
+}
+
+.rack .tile,
+.aim-rail .tile {
+  background-color: rgba(255, 255, 255, 0.06);
+}
+
+.active-piece {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 4;
+  cursor: pointer;
+  transition: left 140ms ease-out;
+}
+
+.active-piece.is-dropping {
+  visibility: hidden;
+}
+
+.active-piece.soft-bounce {
+  animation: soft-bounce 320ms ease-out;
+}
+
+@keyframes soft-bounce {
+  0% {
+    transform: translateX(calc(var(--bounce-dir, 1) * 16px));
+  }
+  55% {
+    transform: translateX(calc(var(--bounce-dir, -1) * 7px));
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+.pad {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.pad button {
+  min-width: 52px;
+}
+
+#btn-drop {
+  flex: 1 1 auto;
+  max-width: 168px;
+}
 
 #fx {
   position: absolute;
   inset: 0;
   pointer-events: none;
   z-index: 3;
+  overflow: visible;
 }
 
 #fx .col-wash {
   position: absolute;
-  top: 0;
-  bottom: 0;
   border-radius: 8px;
   background: linear-gradient(
     180deg,
-    rgba(232, 154, 58, 0.18) 0%,
+    rgba(232, 154, 58, 0.2) 0%,
     rgba(232, 154, 58, 0.08) 100%
   );
   box-shadow: inset 0 0 0 2px rgba(232, 154, 58, 0.35);
@@ -24,14 +90,11 @@
   position: absolute;
   pointer-events: none;
   will-change: transform;
+  z-index: 5;
 }
 
 #board .cell.col-hover {
   background: rgba(232, 154, 58, 0.28);
-}
-
-#board.teach-lock .cell.col-blocked {
-  opacity: 0.4;
 }
 
 #board .tile.ghost {
