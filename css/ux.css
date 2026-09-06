@@ -4,8 +4,16 @@
   justify-content: flex-end;
 }
 
-.danger {
+/* Hard-hide DANGER until rising rows ship. */
+.danger,
+.danger span {
   display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  height: 0 !important;
+  border: 0 !important;
+  overflow: hidden !important;
 }
 
 /* Cheap readability override: keep Mike art, show short tier names. */
