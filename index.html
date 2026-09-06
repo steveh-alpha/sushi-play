@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="css/tier-4.css" />
     <link rel="stylesheet" href="css/tier-5.css" />
     <link rel="stylesheet" href="css/tier-6.css" />
+    <link rel="stylesheet" href="css/ux.css" />
   </head>
   <body>
     <main class="shell">
@@ -40,15 +41,16 @@
       <div class="well">
         <div class="board-wrap">
           <div id="board" role="grid" aria-label="Sushi board"></div>
+          <div id="fx" aria-hidden="true"></div>
           <div class="danger" aria-hidden="true"><span>DANGER</span></div>
         </div>
       </div>
 
       <footer class="footer">
-        <p id="hint">Tap or drag a column to drop</p>
+        <p id="hint">Tap a column to drop. Match stack to merge.</p>
         <button type="button" id="new-game">New game</button>
       </footer>
-      <p class="note">GRO-15: Mike tiles · no rising rows · no game over · vertical merge only.</p>
+      <p class="note">GRO-16: teach + targeting · no rising rows · no game over · vertical merge only.</p>
     </main>
     <script src="js/logic.js"></script>
     <script src="js/main.js"></script>
