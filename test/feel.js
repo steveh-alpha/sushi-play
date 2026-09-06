@@ -20,5 +20,7 @@ assert.match(ux, /\.danger\s*\{[\s\S]*display:\s*none\s*!important/, "DANGER hid
 assert.match(main, /TEACH_LOCK_COPY = "Drop here first"/, "exact lock copy");
 assert.match(main, /paintTeachCue\(true\)/, "bounce flashes the teach cue");
 assert.match(main, /bounceHintOn/, "bounce is not silent — hint + cue");
+assert.match(main, /teach-wash/, "teach column keeps a visible wash");
+assert.match(ux, /\.teach-cue/, "teach cue styled in ux.css");
 
 console.log("feel.js ok");

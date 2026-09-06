@@ -52,6 +52,7 @@
 
   function hideTeachCopy() {
     teachCopyOn = false;
+    bounceHintOn = false;
     hintEl.textContent = "";
     hintEl.hidden = true;
   }
