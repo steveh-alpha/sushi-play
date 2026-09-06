@@ -5,9 +5,8 @@
   --ink: #f4e6d0;
   --muted: #c9b49a;
   --lantern: #e89a3a;
-  --danger: #ff4d4d;
   --line: rgba(244, 230, 208, 0.12);
-  --tile: 64px;
+  --tile: 72px;
 }
 
 * {
@@ -40,7 +39,7 @@ body {
   align-items: flex-end;
   justify-content: space-between;
   gap: 12px;
-  margin-bottom: 12px;
+  margin-bottom: 14px;
 }
 
 h1 {
@@ -56,22 +55,32 @@ h1 {
   font-size: 0.78rem;
 }
 
+.scores {
+  display: flex;
+  gap: 8px;
+}
+
 .scorebox {
   text-align: right;
-  min-width: 96px;
+  min-width: 72px;
+  background: #2b1a11;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 6px 10px 8px;
 }
 
-.scorebox .label,
-.preview .label {
+.scorebox .label {
   display: block;
-  font-size: 0.68rem;
+  font-size: 0.62rem;
   letter-spacing: 0.14em;
   color: var(--muted);
+  text-transform: uppercase;
 }
 
-#score {
+#score,
+#best {
   display: block;
-  font-size: 1.7rem;
+  font-size: 1.45rem;
   line-height: 1.1;
   font-variant-numeric: tabular-nums;
 }
@@ -98,58 +107,12 @@ h1 {
   }
 }
 
-.rack {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  margin: 8px 0 12px;
-}
-
-.preview {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.tile {
-  width: var(--tile);
-  height: var(--tile);
-  border-radius: 12px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  color: #1a100c;
-  box-shadow: inset 0 -4px 0 rgba(0, 0, 0, 0.18);
-  user-select: none;
-}
-
-.tile .glyph {
-  font-size: 1.15rem;
-  font-weight: 800;
-  line-height: 1;
-}
-
-.tile .name {
-  font-size: 0.62rem;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-}
-
-.tile .slot {
-  font-size: 0.55rem;
-  letter-spacing: 0.12em;
-  opacity: 0.7;
-}
-
-
 .well {
   background:
     linear-gradient(180deg, #5a3824 0%, var(--wood) 12%, #2b1a11 100%);
   border: 3px solid #6a4330;
   border-radius: 16px;
-  padding: 10px 10px 12px;
+  padding: 10px;
   box-shadow: 0 12px 0 #1b100b;
   touch-action: none;
 }
@@ -159,17 +122,18 @@ h1 {
 }
 
 #board {
-  --cols: 6;
-  --rows: 8;
+  --cols: 4;
+  --rows: 4;
   position: relative;
   display: grid;
   grid-template-columns: repeat(var(--cols), 1fr);
   grid-template-rows: repeat(var(--rows), 1fr);
-  gap: 4px;
-  aspect-ratio: 6 / 8;
+  gap: 8px;
+  aspect-ratio: 1 / 1;
   background: #21140e;
   border-radius: 10px;
   overflow: hidden;
+  touch-action: none;
 }
 
 .cell {
@@ -179,53 +143,107 @@ h1 {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 3px;
+  padding: 4px;
 }
 
-.cell.col-hover {
-  background: rgba(232, 154, 58, 0.16);
-}
-
-.cell .tile {
+.tile {
   width: 100%;
   height: 100%;
-  border-radius: 8px;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(255, 255, 255, 0.06);
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  box-shadow: none;
+  color: transparent;
+  user-select: none;
+  position: relative;
 }
 
-.danger {
+.tile .glyph,
+.tile .name,
+.tile .slot {
+  display: none;
+}
+
+.tile .name {
+  display: block;
   position: absolute;
-  left: 0;
-  right: 0;
-  top: calc(100% / 8);
-  height: 0;
-  border-top: 2px dashed var(--danger);
+  left: 2px;
+  right: 2px;
+  bottom: 3px;
+  z-index: 1;
+  color: #f4e6d0;
+  font-size: 0.55rem;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  line-height: 1.15;
+  text-align: center;
+  text-transform: uppercase;
+  text-shadow:
+    0 0 3px #140e0c,
+    0 1px 2px #140e0c,
+    0 0 8px #140e0c;
   pointer-events: none;
-  z-index: 2;
 }
 
-.danger span {
+.tile.new {
+  animation: tile-new 180ms ease-out;
+}
+
+.tile.merged {
+  animation: tile-merge 180ms ease-out;
+}
+
+@keyframes tile-new {
+  from {
+    transform: scale(0.4);
+    opacity: 0.2;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes tile-merge {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.12);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+#overlay {
   position: absolute;
-  top: -0.85em;
-  left: 50%;
-  transform: translateX(-50%);
-  background: #2b1a11;
-  color: var(--danger);
-  font-size: 0.62rem;
-  letter-spacing: 0.16em;
-  padding: 0 6px;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  background: rgba(20, 14, 12, 0.72);
+  border-radius: 10px;
+  z-index: 4;
 }
 
-.shake {
-  animation: shake 200ms linear;
+#overlay[hidden] {
+  display: none;
 }
 
-@keyframes shake {
-  25% {
-    transform: translateX(-3px);
-  }
-  75% {
-    transform: translateX(3px);
-  }
+#overlay p {
+  margin: 0;
+  font-size: 1.2rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
 .footer {
@@ -236,10 +254,9 @@ h1 {
   margin-top: 14px;
 }
 
-#hint,
-.note {
+#hint {
   color: var(--muted);
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   margin: 0;
 }
 
@@ -258,8 +275,3 @@ button {
 button:active {
   transform: translateY(1px);
 }
-
-/* GRO-15 Mike art (data-uri tiles) */
-.tile { background-color: transparent !important; background-size: contain; background-repeat: no-repeat; background-position: center; box-shadow: none; }
-.tile .glyph, .tile .name, .tile .slot { color: #fff; }
-.cell .tile { background-color: rgba(255,255,255,0.06); border-radius: 8px; }
