@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Sushi Stack 2048 — graybox</title>
+    <link rel="stylesheet" href="css/game.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <header class="mast">
+        <div>
+          <h1>Sushi Stack</h1>
+          <p class="tag">Graybox · vertical merge only</p>
+        </div>
+        <div class="scorebox">
+          <span class="label">Score</span>
+          <span id="score">0</span>
+          <span id="score-flash"></span>
+        </div>
+      </header>
+
+      <section class="rack" aria-label="Current and next pieces">
+        <div class="preview">
+          <div id="current-tile" class="tile"></div>
+        </div>
+        <div class="preview">
+          <span class="label">Next</span>
+          <div id="next-tile" class="tile"></div>
+        </div>
+      </section>
+
+      <div class="well">
+        <div class="board-wrap">
+          <div id="board" role="grid" aria-label="Sushi board"></div>
+          <div class="danger" aria-hidden="true"><span>DANGER</span></div>
+        </div>
+      </div>
+
+      <footer class="footer">
+        <p id="hint">Tap or drag a column to drop</p>
+        <button type="button" id="new-game">New game</button>
+      </footer>
+      <p class="note">GRO-9: no rising rows, no game over, no horizontal merge.</p>
+    </main>
+    <script src="js/logic.js"></script>
+    <script src="js/main.js"></script>
+  </body>
+</html>
