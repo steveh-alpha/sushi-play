@@ -107,24 +107,43 @@
       const cell = cells[i];
       cell.classList.toggle("teach-col", !!(state.teach && cell.dataset.col === String(state.teachCol)));
     }
+    let wash = fxEl.querySelector(".teach-wash");
+    if (!wash) {
+      wash = document.createElement("div");
+      wash.className = "teach-wash";
+      fxEl.insertBefore(wash, teachCueEl || null);
+    }
     if (!teachCueEl) return;
     if (!state.teach || dropping) {
       teachCueEl.hidden = true;
+      wash.hidden = true;
       teachCueEl.classList.remove("is-flash");
       return;
     }
     const top = cellEl(0, state.teachCol);
     if (!top) {
       teachCueEl.hidden = true;
+      wash.hidden = true;
       return;
     }
     const layerRect = fxEl.getBoundingClientRect();
     const cellRect = top.getBoundingClientRect();
+    const boardRect = boardEl.getBoundingClientRect();
+    wash.hidden = false;
+    wash.style.left = cellRect.left - layerRect.left + "px";
+    wash.style.width = cellRect.width + "px";
+    wash.style.top = "0";
+    wash.style.height = boardRect.bottom - layerRect.top + "px";
     teachCueEl.hidden = false;
     teachCueEl.textContent = TEACH_LOCK_COPY;
     teachCueEl.style.left = cellRect.left - layerRect.left + "px";
     teachCueEl.style.width = cellRect.width + "px";
-    teachCueEl.style.top = cellRect.top - layerRect.top + 4 + "px";
+    if (aimCol !== state.teachCol && aimRailEl) {
+      const railRect = aimRailEl.getBoundingClientRect();
+      teachCueEl.style.top = railRect.top - layerRect.top + 8 + "px";
+    } else {
+      teachCueEl.style.top = cellRect.top - layerRect.top + 4 + "px";
+    }
     if (flash) {
       teachCueEl.classList.remove("is-flash");
       void teachCueEl.offsetWidth;
@@ -264,8 +283,6 @@
       "animationend",
       function () {
         currentTileEl.classList.remove("soft-bounce");
-        bounceHintOn = false;
-        if (teachCopyOn && state.teach) setHint(TEACH_COPY);
       },
       { once: true }
     );
